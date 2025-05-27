@@ -74,28 +74,34 @@ int main() {
 
     // Experiment with shared variable (race condition)
     int times = 10000000; // reduce for testing
+    auto start1 = chrono::high_resolution_clock::now();
     thread t1(increment_no_protect, times);
     thread t2(increment_no_protect, times);
     t1.join();
     t2.join();
-    cout << "Without protection, shared_no_protect = " << shared_no_protect << " (expected: " << times * 2 << ")\n";
+    auto end1 = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration1 = end1 - start1;
+    cout << "Without protection, shared_no_protect = " << shared_no_protect << " (expected: " << times * 2 << ")" << ", time = " << duration1.count() << "\n";
 
     shared_no_protect = 0;
+    auto start2 = chrono::high_resolution_clock::now();
     thread t3(increment_with_mutex, times);
     thread t4(increment_with_mutex, times);
     t3.join();
     t4.join();
-    cout << "With mutex, shared_no_protect = " << shared_no_protect << "\n";
+    auto end2 = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration2 = end2 - start2;
+    cout << "With mutex, shared_no_protect = " << shared_no_protect << ", time = " << duration2.count() << "\n";
 
     shared_atomic = 0;
-    auto start = chrono::high_resolution_clock::now();
+    auto start3 = chrono::high_resolution_clock::now();
     thread t5(increment_atomic, times);
     thread t6(increment_atomic, times);
     t5.join();
     t6.join();
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> duration = end - start;
-    cout << "With atomic, shared_atomic = " << shared_atomic << ", time = " << duration.count() << "s\n";
+    auto end3 = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration3 = end3 - start3;
+    cout << "With atomic, shared_atomic = " << shared_atomic << ", time = " << duration3.count() << "s\n";
 
     return 0;
 }
